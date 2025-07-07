@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .card-img-top {
+        height: 400px; /* Adjust as needed */
+        width: 100%;
+        object-fit: cover;
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+    }
+
+    .card {
+        height: 100%;
+    }
+
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .glass {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+    }
+</style>
+
+<h2 class="mb-4 text-center">🎬 Now Showing</h2>
+
+<div class="row">
+    {% for movie in movies %}
+    <div class="col-md-4">
+        <div class="card text-white bg-dark mb-4 border-0 shadow glass">
+            <img src="{{ movie.poster_url }}" class="card-img-top" alt="{{ movie.title }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ movie.title }}</h5>
+                <p class="card-text">📍 {{ movie.city }}</p>
+                <h6>Showtimes:</h6>
+                {% for show in movie.showtimes %}
+                <a href="/select-seats?show_id={{ show.show_id }}" class="btn btn-sm btn-outline-light mb-1">
+                    {{ show.date }} @ {{ show.time }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  body {
+    background-color: #f7f7f7;
+    font-family: "Segoe UI", sans-serif;
+  }
+
+  .container6 {
+    max-width: 800px;
+    margin: 50px auto;
+    background: #001e46;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .header {
+    background: #2c3e50;
+    color: #fff;
+    padding: 25px;
+    font-size: 24px;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .payment-options {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    background: #000000;
+  }
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 15px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+  }
+
+  .tab:hover {
+    background: #d0d7de;
+  }
+
+  .tab.active {
+    background: #ffffff;
+    border-bottom: 3px solid #2c3e50;
+    color: #2c3e50;
+    font-weight: bold;
+  }
+
+  .payment-content {
+    padding: 30px;
+  }
+
+  .payment-method {
+    display: none;
+  }
+
+  .payment-method.active {
+    display: block;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #000000;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+  }
+
+  input:focus,
+  select:focus {
+    border-color: #2c3e50;
+    outline: none;
+  }
+
+  .summary {
+    margin-top: 30px;
+    background: #000c35;
+    padding: 20px;
+    border-top: 1px solid #ccc;
+    font-size: 17px;
+    border-radius: 0 0 12px 12px;
+  }
+
+  .pay-btn {
+    width: 100%;
+    padding: 14px;
+    background: #2c3e50;
+    color: #fff;
+    border: none;
+    font-size: 17px;
+    border-radius: 6px;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .pay-btn:hover {
+    background: #1a252f;
+  }
+</style>
+
+<div class="container6">
+  <div class="header">Complete Your Payment</div>
+
+  <div class="payment-options">
+    <div class="tab active" onclick="showTab('upi')">UPI</div>
+    <div class="tab" onclick="showTab('card')">Credit/Debit Card</div>
+    <div class="tab" onclick="showTab('netbanking')">Net Banking</div>
+    <div class="tab" onclick="showTab('wallet')">Wallet</div>
+  </div>
+
+  <div class="payment-content">
+    <div class="payment-method active" id="upi">
+      <div class="form-group">
+        <label for="upiId">Enter UPI ID</label>
+        <input type="text" id="upiId" placeholder="e.g., username@bank" />
+      </div>
+    </div>
+
+    <div class="payment-method" id="card">
+      <div class="form-group">
+        <label for="cardNumber">Card Number</label>
+        <input type="text" id="cardNumber" placeholder="XXXX-XXXX-XXXX-XXXX" />
+      </div>
+      <div class="form-group">
+        <label for="cardName">Card Holder Name</label>
+        <input type="text" id="cardName" placeholder="Full Name" />
+      </div>
+      <div class="form-group">
+        <label>Expiry Date</label>
+        <div style="display: flex; gap: 10px">
+          <input type="text" placeholder="MM" style="flex: 1" />
+          <input type="text" placeholder="YY" style="flex: 1" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="cvv">CVV</label>
+        <input type="password" id="cvv" placeholder="e.g., 123" />
+      </div>
+    </div>
+
+    <div class="payment-method" id="netbanking">
+      <div class="form-group">
+        <label for="bank">Choose Bank</label>
+        <select id="bank">
+          <option value="">Select your bank</option>
+          <option>SBI</option>
+          <option>HDFC</option>
+          <option>ICICI</option>
+          <option>Axis Bank</option>
+          <option>Kotak Mahindra</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="payment-method" id="wallet">
+      <div class="form-group">
+        <label for="wallets">Select Wallet</label>
+        <select id="wallets" onchange="showScannerOnWalletSelection(this.value)">
+          <option value="">-- Select Wallet --</option>
+          <option value="Paytm">Paytm</option>
+          <option value="PhonePe">PhonePe</option>
+          <option value="Google Pay">Google Pay</option>
+          <option value="Mobikwik">Mobikwik</option>
+        </select>
+      </div>
+
+      <div id="fakeScanner" style="text-align: center; margin-top: 20px; display: none;">
+        <img src="https://media.giphy.com/media/2IudUHdI075HL02Pkk/giphy.gif" alt="Scanning..." style="width: 200px; border-radius: 8px;" />
+        <p style="color: white; margin-top: 10px;">Scanning your wallet...</p>
+      </div>
+
+      <div id="scanSuccess" style="display:none; color: #00ff99; text-align: center; margin-top: 15px;">
+        ✅ Wallet scanned successfully!
+      </div>
+    </div>
+
+    <div class="summary">
+      <strong>Movie:</strong> Avengers: Endgame<br />
+      <strong>Seats:</strong> {{ selected_seats | join(', ') }}<br />
+      <strong>Total:</strong> ₹{{ 250 * selected_seats|length if selected_seats else 0 }}
+      <form method="POST" action="/confirm-booking" class="text-center mt-3" onsubmit="return validateForm();">
+        <input type="hidden" name="selected_seats" value="{{ selected_seats | join(',') }}" />
+        <button type="submit" class="pay-btn">Make payment</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(method) {
+  const tabs = document.querySelectorAll(".tab");
+  const methods = document.querySelectorAll(".payment-method");
+
+  tabs.forEach((tab) => tab.classList.remove("active"));
+  methods.forEach((m) => m.classList.remove("active"));
+
+  document.querySelector(`.tab[onclick=\"showTab('${method}')\"]`).classList.add("active");
+  document.getElementById(method).classList.add("active");
+
+  const scanner = document.getElementById("fakeScanner");
+  const successMsg = document.getElementById("scanSuccess");
+
+  if (scanner && successMsg) {
+    scanner.style.display = "none";
+    successMsg.style.display = "none";
+  }
+}
+
+function showScannerOnWalletSelection(value) {
+  const scanner = document.getElementById("fakeScanner");
+  const successMsg = document.getElementById("scanSuccess");
+  if (value) {
+    scanner.style.display = "block";
+    successMsg.style.display = "none";
+
+    setTimeout(() => {
+      scanner.style.display = "none";
+      successMsg.style.display = "block";
+    }, 3000);
+  } else {
+    scanner.style.display = "none";
+    successMsg.style.display = "none";
+  }
+}
+
+function validateForm() {
+  const activeTab = document.querySelector(".payment-method.active").id;
+
+  if (activeTab === "upi") {
+    const upi = document.getElementById("upiId").value.trim();
+    if (!upi) {
+      alert("Please enter your UPI ID.");
+      return false;
+    }
+  }
+
+  if (activeTab === "card") {
+    const cardNumber = document.getElementById("cardNumber").value.trim();
+    const cardName = document.getElementById("cardName").value.trim();
+    const mm = document.querySelector('input[placeholder="MM"]').value.trim();
+    const yy = document.querySelector('input[placeholder="YY"]').value.trim();
+    const cvv = document.getElementById("cvv").value.trim();
+
+    if (!cardNumber || !cardName || !mm || !yy || !cvv) {
+      alert("Please complete all card details.");
+      return false;
+    }
+  }
+
+  if (activeTab === "netbanking") {
+    const bank = document.getElementById("bank").value;
+    if (!bank) {
+      alert("Please select your bank.");
+      return false;
+    }
+  }
+
+  if (activeTab === "wallet") {
+    const wallet = document.getElementById("wallets").value;
+    if (!wallet) {
+      alert("Please select a wallet.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// Check login before payment
+document.addEventListener('DOMContentLoaded', function () {
+  const user = JSON.parse(localStorage.getItem('mm_user'));
+  if (!user || !user.email) {
+    alert('Please login to continue to payment.');
+    window.location.href = '/login';
+  }
+});
+</script>
+{% endblock %}

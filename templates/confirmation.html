@@ -1,0 +1,8 @@
+{% extends "base.html" %} {% block content %}
+<div class="text-center glass mx-auto" style="max-width: 600px;">
+    <h2 class="mb-4">✅ Booking Confirmed!</h2>
+    <p>You have booked the following seat(s):</p>
+    <h4>{{ seats | join(', ') }}</h4>
+    <a href="/dashboard" class="btn btn-outline-light mt-3">Back to Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,319 @@
+{% extends "base.html" %} {% block content %}
+<h2 class="text-center mb-4 text-light">🎟️ Choose Your Seats</h2>
+
+<div class="container seat-container">
+  <!-- LEGEND -->
+  <div class="text-center legend mb-4">
+    <span class="legend-item selected"></span> Selected
+    <span class="legend-item booked"></span> Booked
+    <span class="ms-4 text-warning">Gold (₹250) | Silver (₹180) | Bronze (₹120)</span>
+  </div>
+
+  <!-- GOLD CLASS ROWS: A, B -->
+  <div class="text-center text-warning fw-bold mb-2">GOLD CLASS</div>
+  {% for row in ["A", "B"] %}
+  <div class="seat-row">
+    <span class="row-label">{{ row }}</span>
+    <div class="seat-group">
+      {% for seat in seats if seat.id.startswith(row) %} {% set seat_num = seat.id[1:] %} {% if seat_num == '7' %}
+      <div class="aisle"></div>
+      {% endif %}
+      <button
+        class="seat gold {% if seat.booked %}booked{% endif %}"
+        data-seat="{{ seat.id }}"
+        data-tier="gold"
+        {% if seat.booked %}disabled{% endif %}
+      >
+        {{ seat_num }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- SILVER CLASS ROWS: C, D -->
+  <div class="text-center text-secondary fw-bold mt-4 mb-2">SILVER CLASS</div>
+  {% for row in ["C", "D"] %}
+  <div class="seat-row">
+    <span class="row-label">{{ row }}</span>
+    <div class="seat-group">
+      {% for seat in seats if seat.id.startswith(row) %} {% set seat_num = seat.id[1:] %} {% if seat_num == '7' %}
+      <div class="aisle"></div>
+      {% endif %}
+      <button
+        class="seat silver {% if seat.booked %}booked{% endif %}"
+        data-seat="{{ seat.id }}"
+        data-tier="silver"
+        {% if seat.booked %}disabled{% endif %}
+      >
+        {{ seat_num }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- BRONZE CLASS ROWS: E, F, G -->
+  <div class="text-center text-bronze fw-bold mt-4 mb-2" style="color:#cd7f32;">BRONZE CLASS</div>
+  {% for row in ["E", "F", "G"] %}
+  <div class="seat-row">
+    <span class="row-label">{{ row }}</span>
+    <div class="seat-group">
+      {% for seat in seats if seat.id.startswith(row) %} {% set seat_num = seat.id[1:] %} {% if seat_num == '7' %}
+      <div class="aisle"></div>
+      {% endif %}
+      <button
+        class="seat bronze {% if seat.booked %}booked{% endif %}"
+        data-seat="{{ seat.id }}"
+        data-tier="bronze"
+        {% if seat.booked %}disabled{% endif %}
+      >
+        {{ seat_num }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- PRICE SUMMARY -->
+  <div class="price-box text-center mt-5">
+    <p><strong>Selected Seats:</strong> <span id="seatNames">None</span></p>
+    <p><strong>Total Price:</strong> ₹<span id="totalPrice">0</span></p>
+  </div>
+
+  <!-- BOOKING -->
+  <form method="POST" action="/payment" id="bookingForm" class="text-center mt-3">
+    <input type="hidden" name="selected_seats" id="selectedSeatsInput" />
+    <button type="submit" class="btn btn-outline-light px-5 py-2">
+      Confirm Booking
+    </button>
+  </form>
+
+  <!-- SCREEN (Moved below seats) -->
+  <div class="screen-container text-center mt-5">
+    <div class="screen-realistic mx-auto">
+      <div class="screen-glow"></div>
+      <span class="screen-label">SCREEN</span>
+    </div>
+  </div>
+</div>
+
+<!-- STYLES -->
+<style>
+  body {
+    background-color: #0a0f1b;
+    color: #fff;
+  }
+
+  .seat-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 30px;
+    background: radial-gradient(circle at top, #1b2230, #0a0f1b);
+    border-radius: 16px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+  }
+
+  .screen-realistic {
+    position: relative;
+    width: 70%;
+    height: 40px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, #e0e0e0 60%, #b0b0b0 100%);
+    border-radius: 0 0 80px 80px/0 0 40px 40px;
+    box-shadow: 0 12px 40px 0 #fff8, 0 2px 16px 0 #0006;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .screen-glow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    height: 60%;
+    background: radial-gradient(ellipse at center, #fffbe6 0%, #fff0 80%);
+    opacity: 0.7;
+    border-radius: 0 0 80px 80px/0 0 40px 40px;
+    z-index: 1;
+  }
+
+  .screen-label {
+    position: relative;
+    z-index: 2;
+    font-weight: bold;
+    color: #333;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    bottom: 8px;
+  }
+
+  .legend-item {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin: 0 8px 0 16px;
+    border-radius: 4px;
+  }
+
+  .legend-item.available {
+    background-color: #28a745;
+  }
+
+  .legend-item.selected {
+    background-color: #007bff;
+  }
+
+  .legend-item.booked {
+    background-color: #dc3545;
+  }
+
+  .seat-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  .row-label {
+    width: 30px;
+    text-align: right;
+    margin-right: 10px;
+    font-weight: bold;
+  }
+
+  .seat-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .seat {
+    width: 42px;
+    height: 42px;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+    color: white;
+    transition: 0.2s;
+    text-align: center;
+    line-height: 42px;
+  }
+
+  .seat.gold {
+    background: linear-gradient(135deg, #ffd700 60%, #fffbe6 100%);
+    color: #333;
+    border: 2px solid #ffd700;
+    opacity: 1;
+  }
+
+  .seat.silver {
+    background: linear-gradient(135deg, #c0c0c0 60%, #f8f8f8 100%);
+    color: #333;
+    border: 2px solid #c0c0c0;
+    opacity: 1;
+  }
+
+  .seat.bronze {
+    background: linear-gradient(135deg, #cd7f32 60%, #fff0e0 100%);
+    color: #333;
+    border: 2px solid #cd7f32;
+    opacity: 1;
+  }
+
+  .seat.booked {
+    background: repeating-linear-gradient(135deg, #dc3545 0 10px, #a71d2a 10px 20px);
+    color: #fff;
+    cursor: not-allowed;
+    border: 2px solid #dc3545;
+    opacity: 0.7;
+    text-decoration: line-through;
+  }
+
+  .seat.selected {
+    background: linear-gradient(135deg, #007bff 60%, #66b3ff 100%) !important;
+    color: #fff;
+    border: 2px solid #007bff;
+    opacity: 1;
+    box-shadow: 0 0 10px 2px #007bff66;
+  }
+
+  .seat:not(.booked):not(.selected):hover {
+    transform: scale(1.1);
+    opacity: 0.85;
+    box-shadow: 0 0 8px 2px #fff2;
+  }
+
+  .aisle {
+    width: 30px;
+  }
+
+  .price-box p {
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+  }
+
+  .text-bronze {
+    color: #cd7f32 !important;
+  }
+</style>
+
+<!-- SCRIPT -->
+<!-- SCRIPT -->
+<script>
+  const seats = document.querySelectorAll(".seat:not(.booked)");
+  const selectedSeatsInput = document.getElementById("selectedSeatsInput");
+  const seatNamesDisplay = document.getElementById("seatNames");
+  const totalPriceDisplay = document.getElementById("totalPrice");
+  const form = document.getElementById("bookingForm");
+
+  let selected = [];
+  let total = 0;
+
+  const seatPrices = {
+    gold: 250,
+    silver: 180,
+    bronze: 120
+  };
+
+  function updateSummary() {
+    seatNamesDisplay.textContent = selected.join(", ") || "None";
+    totalPriceDisplay.textContent = total;
+    selectedSeatsInput.value = selected.join(",");
+  }
+
+  // ✅ Alert if no seat is selected
+  form.addEventListener("submit", function (e) {
+    if (selected.length === 0) {
+      e.preventDefault();
+      alert("Please select at least one seat.");
+    }
+  });
+
+  // ✅ Handle seat selection
+  seats.forEach((seat) => {
+    seat.addEventListener("click", () => {
+      const seatId = seat.getAttribute("data-seat");
+      const tier = seat.getAttribute("data-tier");
+      const price = seatPrices[tier];
+
+      if (seat.classList.contains("selected")) {
+        seat.classList.remove("selected");
+        selected = selected.filter((id) => id !== seatId);
+        total -= price;
+      } else {
+        seat.classList.add("selected");
+        selected.push(seatId);
+        total += price;
+      }
+
+      updateSummary();
+    });
+  });
+
+  updateSummary();
+</script>
+{% endblock %}
